@@ -1,43 +1,17 @@
-# Delete any conflicting ghost clusters
-kind delete cluster
+# ☸️ Local Kubernetes (Kind) Learning Portfolio
 
-# Ensure Docker is active on Fedora
-sudo systemctl start docker
+Welcome to my local Kubernetes playground! This repository tracks my journey learning container orchestration, ingress routing, and microservice networking using **Kind (Kubernetes in Docker)** on Fedora Linux.
 
-# Create the cluster with host port mappings (80/443)
-kind create cluster --config kind-config.yaml
+---
 
-# Apply the Kind-specific NGINX Ingress controller
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+## 📂 Projects Directory
 
-# Wait for the controller to be ready (takes ~1-2 minutes)
-kubectl wait --namespace ingress-nginx \
-  --for=condition=ready pod \
-  --selector=app.kubernetes.io/component=controller \
-  --timeout=90s
+### 🚀 [Project 01: Basic Local Multi-Routing](./01-basic-echo-routing)
+* **Concepts:** Cluster provisioning, basic HTTP-Echo servers, domain local routing.
+* **Tech Stack:** Kind, NGINX Ingress Controller, YAML Manifests.
+* 👉 [Click here to see Project 1 Setup & Code](./01-basic-echo-routing)
 
-  # Navigate to your manifests folder
-cd ~/Documents/mini-k8s-project/K8s
-
-# Deploy App 1, App 2, and the Ingress resource
-kubectl apply -f app1.yaml
-kubectl apply -f app2.yaml
-kubectl apply -f ingress.yaml
-
-# Verify everything is running correctly
-kubectl get deployments,services,ingress
-
-# Open your hosts file
-sudo vi /etc/hosts
-
-# Add this line to the very bottom of the file and save:
-127.0.0.1  app1.local app2.local
-
-# Test Host-Based Routing (Separate domains)
-curl http://app1.local
-curl http://app2.local
-
-# Test Path-Based Routing (Same domain, different sub-folders)
-curl http://localhost/app1
-curl http://localhost/app2
-
+### 🐍 [Project 02: Advanced Python Microservices Suite](./02-python-microservices)
+* **Concepts:** Multi-app host and path-based routing isolation, cross-container data fetching via frontend JavaScript, local Docker image builds and sideloading.
+* **Tech Stack:** Python (Flask), Docker, Kubernetes Deployments/Services, NGINX Ingress.
+* 👉 [Click here to see Project 2 Setup & Code](./02-python-microservices)
