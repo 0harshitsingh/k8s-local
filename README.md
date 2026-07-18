@@ -12,6 +12,11 @@ Welcome to my local Kubernetes playground! This repository tracks my journey lea
 * 👉 [Click here to see Project 1 Setup & Code](./01-basic-echo-routing)
 
 ### 🐍 [Project 02: Advanced Python Microservices Suite](./02-python-microservices)
-* **Concepts:** Multi-app host and path-based routing isolation, cross-container data fetching via frontend JavaScript, local Docker image builds and sideloading.
+* **Concepts:** Multi-app host and path-based routing isolation, cross-container data fetching via frontend JavaScript, local Docker image builds.
 * **Tech Stack:** Python (Flask), Docker, Kubernetes Deployments/Services, NGINX Ingress.
 * 👉 [Click here to see Project 2 Setup & Code](./02-python-microservices)
+
+### 🗄️ [Project 03: The Stateful Database Upgrade](./03-stateful-microservices)
+* **Concepts:** Persistent Volumes (`PVC`), secure Kubernetes `Secrets` encoding, database state tracking, live SQL connections inside Python (`psycopg2`).
+* **Tech Stack:** PostgreSQL 15, Python Flask, Kind Local Storage Provisioner.
+* 👉 [Click here to see Project 3 Setup & Code](./03-stateful-microservices)
