@@ -20,3 +20,7 @@ Welcome to my local Kubernetes playground! This repository tracks my journey lea
 * **Concepts:** Persistent Volumes (`PVC`), secure Kubernetes `Secrets` encoding, database state tracking, live SQL connections inside Python (`psycopg2`).
 * **Tech Stack:** PostgreSQL 15, Python Flask, Kind Local Storage Provisioner.
 * 👉 [Click here to see Project 3 Setup & Code](./03-stateful-microservices)
+
+### 📊 [Project 04: Production Observability Stack](./04-helm-shop)
+* **Concepts:** Automated cloud-native systems monitoring, cluster telemetry aggregation, custom dashboard metric visualization, secure port-forward tunneling.
+* **Tech Stack:** Prometheus, Grafana, Helm Core, PromQL.
