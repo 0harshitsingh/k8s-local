@@ -46,3 +46,12 @@ helm install monitor-stack prometheus-community/kube-prometheus-stack \
 Accessing the Live Dashboard:
 Securely tunnel into the cluster network from your local machine:
 kubectl port-forward svc/monitor-stack-grafana 3000:80 -n monitoring
+
+## 🔒 Project 05: Secure Ingress Traffic Control (TLS/HTTPS)
+
+Upgraded the local web architecture from unencrypted HTTP to production-grade HTTPS (`https://shop.local`) by generating custom local cryptographic keypairs.
+
+### 🧠 Core Architecture & Concepts
+* **Local Certificate Authority:** Generated custom 2048-bit RSA keys and self-signed X.509 certificates using OpenSSL natively on Fedora.
+* **Kubernetes TLS Secrets:** Cryptographically injected the generated `.key` and `.crt` files into the cluster namespace using native `kubernetes.io/tls` secret layers.
+* **Automated SSL Redirection:** Configured NGINX Ingress annotations (`ssl-redirect: "true"`) to enforce automatic fallback routing from port 80 to encrypted port 443.
