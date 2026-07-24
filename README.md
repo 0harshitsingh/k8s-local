@@ -21,7 +21,7 @@ Welcome to my local Kubernetes playground! This repository tracks my journey lea
 * **Tech Stack:** PostgreSQL 15, Python Flask, Kind Local Storage Provisioner.
 * 👉 [Click here to see Project 3 Setup & Code](./03-stateful-microservices)
 
-# 📊 Project 04: Production Observability Stack (Prometheus & Grafana)
+# 📊 Project 03-a: Production Observability Stack (Prometheus & Grafana)
 
 Unlike previous projects that used local YAML manifests, this production metrics engine was deployed directly into the cluster using **Helm** to aggregate cluster-wide telemetry.
 
@@ -47,7 +47,7 @@ Accessing the Live Dashboard:
 Securely tunnel into the cluster network from your local machine:
 kubectl port-forward svc/monitor-stack-grafana 3000:80 -n monitoring
 
-## 🔒 Project 05: Secure Ingress Traffic Control (TLS/HTTPS)
+## 🔒 Project 03-b: Secure Ingress Traffic Control (TLS/HTTPS)
 
 Upgraded the local web architecture from unencrypted HTTP to production-grade HTTPS (`https://shop.local`) by generating custom local cryptographic keypairs.
 
@@ -55,3 +55,18 @@ Upgraded the local web architecture from unencrypted HTTP to production-grade HT
 * **Local Certificate Authority:** Generated custom 2048-bit RSA keys and self-signed X.509 certificates using OpenSSL natively on Fedora.
 * **Kubernetes TLS Secrets:** Cryptographically injected the generated `.key` and `.crt` files into the cluster namespace using native `kubernetes.io/tls` secret layers.
 * **Automated SSL Redirection:** Configured NGINX Ingress annotations (`ssl-redirect: "true"`) to enforce automatic fallback routing from port 80 to encrypted port 443.
+
+### 🤖 [Project 04: Multi-Node GitOps Engine & CNI (Calico + Argo CD)](#-project-06-multi-node-gitops-engine--cni-calico--argo-cd)
+* **Concepts:** Custom CNI network fabrics, multi-node architecture, declarative continuous delivery pipelines, automated self-healing.
+* **Tech Stack:** Calico CNI, Argo CD, Kind Multi-Node Blueprint, GitOps.
+
+---
+
+## 🤖 Project 04: Multi-Node GitOps Engine & CNI (Calico + Argo CD)
+
+Transitioned from manual `kubectl` operations to an enterprise continuous delivery architecture using **Argo CD** running on a custom multi-node cluster with **Calico CNI**.
+
+### 🧠 Core Architecture & Concepts
+* **Custom CNI Provisioning:** Disabled Kind's default `kindnetd` CNI engine to deploy **Calico CNI** across a 3-node topology (1 control-plane + 2 worker nodes), enabling granular pod networking and zero-trust NetworkPolicy capabilities.
+* **GitOps Automated Deployment:** Linked Argo CD directly to GitHub (`k8s-local`), establishing Git as the single source of truth for cluster state.
+* **Self-Healing & Pruning:** Configured automated drift detection (`selfHeal: true`) to instantly revert manual cluster modifications and keep running pods locked to Git manifests.

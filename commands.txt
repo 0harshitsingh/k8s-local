@@ -1,0 +1,178 @@
+===============================================================================
+☸️ KUBERNETES LEARNING PORTFOLIO — PROJECT-BY-PROJECT COMMAND CHEATSHEET
+===============================================================================
+Repository Location: ~/Documents/k8s/k8s-local
+OS Environment: Fedora Linux | Kind (Kubernetes in Docker)
+
+-------------------------------------------------------------------------------
+🚀 PROJECT 01: BASIC LOCAL MULTI-ROUTING (Ingress & Echo Services)
+-------------------------------------------------------------------------------
+# 1. Provision Kind Cluster
+kind create cluster --config kind-config.yaml
+
+# 2. Deploy NGINX Ingress Controller for Kind
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+
+# 3. Wait for Ingress Controller readiness
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=90s
+
+# 4. Deploy Echo Applications and Ingress Rules
+kubectl apply -f echo-app.yaml
+kubectl apply -f ingress.yaml
+
+# 5. Verify Pods and Services
+kubectl get pods
+kubectl get svc
+kubectl get ingress
+
+# 6. Test Routing
+curl http://localhost/apple
+curl http://localhost/banana
+
+
+-------------------------------------------------------------------------------
+🐍 PROJECT 02: ADVANCED PYTHON MICROSERVICES SUITE
+-------------------------------------------------------------------------------
+# 1. Build Local Microservice Docker Images
+docker build -t frontend-app:v1 ./frontend
+docker build -t backend-app:v1 ./backend
+
+# 2. Load Images into Kind Cluster Container Engine
+kind load docker-image frontend-app:v1
+kind load docker-image backend-app:v1
+
+# 3. Apply Microservices Manifests & Ingress Routing
+kubectl apply -f backend-deployment.yaml
+kubectl apply -f frontend-deployment.yaml
+kubectl apply -f ingress.yaml
+
+# 4. Local DNS Mapping in /etc/hosts
+sudo sh -c 'echo "127.0.0.1 shop.local" >> /etc/hosts'
+
+# 5. Test Endpoint Connectivity
+curl http://shop.local/api/products
+
+
+-------------------------------------------------------------------------------
+🗄️ PROJECT 03: THE STATEFUL DATABASE UPGRADE (PostgreSQL + PVC)
+-------------------------------------------------------------------------------
+# 1. Inject Database Password Secret
+kubectl create secret generic postgres-secret \
+  --from-literal=POSTGRES_PASSWORD=mysecretpassword
+
+# 2. Deploy Persistent Volume Claim & PostgreSQL Stateful Database
+kubectl apply -f postgres-pvc.yaml
+kubectl apply -f postgres-deployment.yaml
+
+# 3. Deploy API Microservice connected to PostgreSQL
+kubectl apply -f api-deployment.yaml
+
+# 4. Verify Database Pod and Volume Mounts
+kubectl get pvc
+kubectl get pods -l app=postgres
+
+# 5. Test API-to-Database Live Interaction
+curl http://shop.local/api/products
+
+
+-------------------------------------------------------------------------------
+📊 PROJECT 04: PRODUCTION OBSERVABILITY STACK (Prometheus & Grafana)
+-------------------------------------------------------------------------------
+# 1. Add Prometheus Helm Repository
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+# 2. Deploy kube-prometheus-stack via Helm
+helm install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --create-namespace
+
+# 3. Verify Monitoring Stack Deployment
+kubectl get pods -n monitoring
+
+# 4. Decode Grafana Admin Password
+kubectl get secret --namespace monitoring prometheus-grafana \
+  -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+# 5. Access Grafana Dashboard via Port-Forwarding
+kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80
+
+# 6. Run Cluster Stress Test to Generate CPU Load Telemetry
+kubectl run stress-test --image=polinux/stress --restart=Never -- stress --cpu 2 --timeout 60s
+
+
+-------------------------------------------------------------------------------
+🔒 PROJECT 05: SECURE INGRESS TRAFFIC CONTROL (TLS/HTTPS Encryption)
+-------------------------------------------------------------------------------
+# 1. Generate 2048-bit RSA Self-Signed Certificate via OpenSSL on Fedora
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout shop.key \
+  -out shop.crt \
+  -subj "/CN=shop.local/O=StorefrontSecurity"
+
+# 2. Create Kubernetes TLS Secret from Generated Certificate Keypair
+kubectl create secret tls shop-tls-cert \
+  --key shop.key \
+  --cert shop.crt
+
+# 3. Enable TLS Termination and Auto SSL Redirection in Ingress Manifest
+# Edit ingress.yaml to add annotations (ssl-redirect: "true") and tls block
+kubectl apply -f ~/Documents/k8s/k8s-local/03-stateful-microservices/ingress.yaml
+
+# 4. Verify Encrypted Handshake Connection over Port 443
+curl -k https://shop.local/api/products
+
+
+-------------------------------------------------------------------------------
+🤖 PROJECT 06: MULTI-NODE GITOPS ENGINE & CNI (Calico + Argo CD)
+-------------------------------------------------------------------------------
+# 1. Clean Port 80/443 Conflicts & Remove Previous Cluster
+kind get clusters
+kind delete cluster
+
+# 2. Provision Custom 3-Node Kind Cluster (disableDefaultCNI: true)
+cd ~/Documents/k8s/k8s-local/06-gitops-cluster
+kind create cluster --config kind-config.yaml
+
+# 3. Deploy Calico CNI Engine for Networking & NetworkPolicies
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/calico.yaml
+
+# 4. Verify Calico Network Daemons & Node Readiness
+kubectl get pods -n kube-system -w
+kubectl get nodes
+
+# 5. Install Argo CD GitOps Engine
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# 6. Extract Argo CD Admin Initial Password
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d; echo
+
+# 7. Expose Argo CD Web Dashboard on Port 7000
+kubectl port-forward svc/argocd-server -n argocd 7000:443
+
+# 8. Create Application Manifests & Push to GitHub Single Source of Truth
+cd ~/Documents/k8s/k8s-local
+git add .
+git commit -m "feat: add demo app manifests for Argo CD GitOps tracking"
+git push origin main
+
+# 9. Apply Argo CD Application Resource for GitOps Tracking
+kubectl apply -f ~/Documents/k8s/k8s-local/06-gitops-cluster/argocd-app.yaml
+
+# 10. (Troubleshooting) Fix Corrupted Local Git References
+find .git/objects/ -type f -empty -delete
+git fetch origin
+git update-ref refs/heads/main origin/main
+git symbolic-ref HEAD refs/heads/main
+
+# 11. Scale Application via GitOps (Change replicas: 3 in Git)
+vi 06-gitops-cluster/app-manifests/demo-app.yaml
+git add .
+git commit -m "feat: scale gitops-demo application to 3 replicas"
+git push origin main
+===============================================================================
+
