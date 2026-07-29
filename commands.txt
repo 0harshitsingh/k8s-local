@@ -176,3 +176,21 @@ git commit -m "feat: scale gitops-demo application to 3 replicas"
 git push origin main
 ===============================================================================
 
+PROJECT 05: ZERO-TRUST NETWORK ISOLATION (Calico NetworkPolicies)
+-------------------------------------------------------------------------------
+# 1. Create Dedicated Workspace
+cd ~/Documents/k8s/k8s-local/07-network-policy
+
+# 2. Deploy Demo Workloads (Backend, Frontend, Rogue)
+kubectl apply -f workloads.yaml
+
+# 3. Test Unrestricted Connectivity (Pre-Policy)
+kubectl exec -it frontend-pod -- curl --connect-timeout 3 http://backend-svc
+kubectl exec -it rogue-pod -- curl --connect-timeout 3 http://backend-svc
+
+# 4. Apply Ingress Firewall Policy (Allow Frontend, Block All Else)
+kubectl apply -f backend-policy.yaml
+
+# 5. Verify Zero-Trust Isolation (Post-Policy)
+kubectl exec -it frontend-pod -- curl --connect-timeout 3 http://backend-svc   # Returns HTTP 200
+kubectl exec -it rogue-pod -- curl --connect-timeout 3 http://backend-svc      # Times out (dropped)
