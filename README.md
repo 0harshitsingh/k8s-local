@@ -70,3 +70,18 @@ Transitioned from manual `kubectl` operations to an enterprise continuous delive
 * **Custom CNI Provisioning:** Disabled Kind's default `kindnetd` CNI engine to deploy **Calico CNI** across a 3-node topology (1 control-plane + 2 worker nodes), enabling granular pod networking and zero-trust NetworkPolicy capabilities.
 * **GitOps Automated Deployment:** Linked Argo CD directly to GitHub (`k8s-local`), establishing Git as the single source of truth for cluster state.
 * **Self-Healing & Pruning:** Configured automated drift detection (`selfHeal: true`) to instantly revert manual cluster modifications and keep running pods locked to Git manifests.
+
+## 🛡️ [Project 05: Zero-Trust Network Isolation (Calico NetworkPolicies)](#-project-07-zero-trust-network-isolation-calico-networkpolicies)
+* **Concepts:** Pod-level firewalling, label-based ingress filtering, kernel-level packet dropping, zero-trust network segmentation.
+* **Tech Stack:** Calico CNI, Kubernetes NetworkPolicy, iptables/eBPF.
+
+---
+
+## 🛡️ Project 05: Zero-Trust Network Isolation (Calico NetworkPolicies)
+
+Leveraged **Calico CNI** to enforce a zero-trust packet filtering layer across microservices in the cluster.
+
+### 🧠 Core Architecture & Security Controls
+* **Implicit Deny Firewalling:** Overrode default flat-network pod routing by attaching a declarative `NetworkPolicy` to backend workloads.
+* **Label-Based Access Control:** Configured granular `ingress` rules allowing traffic strictly from pods matching `role: frontend` on TCP port 80.
+* **Kernel Packet Dropping:** Verified that unauthorized pods (`role: rogue`) suffer connection timeouts via Calico packet dropping rather than software-level HTTP rejection errors.
