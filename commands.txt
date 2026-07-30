@@ -194,3 +194,25 @@ kubectl apply -f backend-policy.yaml
 # 5. Verify Zero-Trust Isolation (Post-Policy)
 kubectl exec -it frontend-pod -- curl --connect-timeout 3 http://backend-svc   # Returns HTTP 200
 kubectl exec -it rogue-pod -- curl --connect-timeout 3 http://backend-svc      # Times out (dropped)
+
+-------------------------------------------------------------------------------
+🔐 PROJECT 08: HASHICORP VAULT & EXTERNAL SECRETS OPERATOR (ESO)
+-------------------------------------------------------------------------------
+# 1. Enable K8s Auth & Write Role in Vault
+kubectl exec -it vault-0 -n vault -- vault auth enable kubernetes
+kubectl exec -it vault-0 -n vault -- vault write auth/kubernetes/config kubernetes_host="https://kubernetes.default.svc:443"
+
+kubectl exec -it vault-0 -n vault -- vault write auth/kubernetes/role/eso-role \
+  bound_service_account_names=extenal-secrets-external-secrets \
+  bound_service_account_namespaces=external-secrets \
+  policies=eso-policy \
+  ttl=1h
+
+# 2. Write Secret to Vault
+kubectl exec -it vault-0 -n vault -- vault kv put secret/db-pass username="postgres_admin" password="VaultSuperSecret2026!"
+
+# 3. Apply ESO Resources & Verify Synced K8s Secret
+kubectl apply -f cluster-secret-store.yaml
+kubectl apply -f external-secret.yaml
+kubectl get secret db-app-secret -o jsonpath="{.data.DB_PASSWORD}" | base64 --decode; echo
+EOF

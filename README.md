@@ -85,3 +85,38 @@ Leveraged **Calico CNI** to enforce a zero-trust packet filtering layer across m
 * **Implicit Deny Firewalling:** Overrode default flat-network pod routing by attaching a declarative `NetworkPolicy` to backend workloads.
 * **Label-Based Access Control:** Configured granular `ingress` rules allowing traffic strictly from pods matching `role: frontend` on TCP port 80.
 * **Kernel Packet Dropping:** Verified that unauthorized pods (`role: rogue`) suffer connection timeouts via Calico packet dropping rather than software-level HTTP rejection errors.
+
+🔐 Project 08: GitOps Secret Engine with HashiCorp Vault & External Secrets Operator (ESO)
+
+## 📌 Overview
+This project implements enterprise zero-trust secret management for Kubernetes applications. Secrets are never stored inside Git manifests. Instead, non-sensitive `ExternalSecret` custom resources reference central keys stored inside **HashiCorp Vault**. The **External Secrets Operator (ESO)** dynamically pulls credentials from Vault via ServiceAccount JWT authentication and syncs them into native Kubernetes `Secret` objects.
+
+---
+
+## 🏗️ Architecture & Component Workflow
+
+[ GitHub Repo ] ---> (Syncs Non-Sensitive ExternalSecret YAML) ---> [ Argo CD / K8s ]
+|
+[ HashiCorp Vault ] <--- (Fetches Real Secret Value) <--- [ External Secrets Operator ]
+|                                                                  |
+(Stores Encrypted Secret)                                    (Creates K8s Native Secret)
+
+1. **HashiCorp Vault**: Runs inside the cluster as the centralized, secure key-value store.
+2. **Kubernetes Auth Method**: Vault trusts tokens issued to specific Kubernetes ServiceAccounts.
+3. **External Secrets Operator (ESO)**: Watches `ExternalSecret` resources, authenticates to Vault, and manages native K8s `Secret` lifecycle.
+
+---
+
+## 🛠️ Key Manifest Files
+
+* **`cluster-secret-store.yaml`**: Defines cluster-wide provider connection to Vault using K8s SA authentication.
+* **`external-secret.yaml`**: Declares target secret mappings without exposing sensitive plaintext values.
+
+---
+
+## 🧪 Verification & Proof of Concept
+
+### Decrypting Synced Secret directly from Kubernetes:
+```bash
+kubectl get secret db-app-secret -o jsonpath="{.data.DB_PASSWORD}" | base64 --decode; echo
+# Output: VaultSuperSecret2026!
