@@ -1,0 +1,16 @@
+apiVersion: linkerd.io/v1alpha2
+kind: ServiceProfile
+metadata:
+  name: voting-svc.emojivoto.svc.cluster.local
+  namespace: emojivoto
+spec:
+  routes:
+    - name: VoteDoughnut
+      condition:
+        pathRegex: /emojivoto.v1.VotingService/VoteDoughnut
+      isRetryable: true
+      timeout: 500ms
+    - name: VoteDog
+      condition:
+        pathRegex: /emojivoto.v1.VotingService/VoteDog
+      isRetryable: true
