@@ -120,3 +120,52 @@ This project implements enterprise zero-trust secret management for Kubernetes a
 ```bash
 kubectl get secret db-app-secret -o jsonpath="{.data.DB_PASSWORD}" | base64 --decode; echo
 # Output: VaultSuperSecret2026!
+
+Project 7 # 🗳️ Linkerd Voting Mesh Demo
+
+A complete, production-grade Kubernetes demonstration showcasing modern **Service Mesh** capabilities using **Linkerd**. 
+
+This repository demonstrates **automatic mTLS encryption**, **Canary deployments (Traffic Splitting)**, and **L7 Zero-Trust Authorization Policies** across a multi-candidate microservice voting application.
+
+---
+
+## 🌟 Key Features Demonstrated
+
+* 🔐 **Automatic mTLS & Zero-Trust Security**: Mutual TLS encryption between all meshed workloads without application code modifications.
+* 🔀 **Canary Rollouts (`TrafficSplit`)**: Weighted traffic splitting (80% v1 / 20% v2) using SMI Custom Resource Definitions.
+* 🛡️ **Fine-Grained L7 Access Control**: Pod identity verification enforcing explicit "least privilege" access to specific backend endpoints.
+* 📊 **Observability & Metrics**: Real-time HTTP metrics, success rates, and latency tracking per service version.
+
+---
+
+## 📐 Architecture Diagram
+
+```text
+                                    +------------------------------+
+                                    |     Linkerd Control Plane    |
+                                    +------------------------------+
+                                                   |
+                                 Pushes TLS identities & policy rules
+                                                   v
++---------------------------------------------------------------------------------------------------+
+| NAMESPACE: voting-mesh                                                                            |
+|                                                                                                   |
+|  +-----------------+          +------------------+     80% Traffic    +------------------------+  |
+|  |    vote-bot     | -------> | candidate-alice  | -----------------> | candidate-alice (v1)   |  |
+|  | (Traffic Generator)|       | (Service Apex)   |                    +------------------------+  |
+|  +-----------------+          +------------------+     20% Traffic    +------------------------+  |
+|          |                                       -----------------> | candidate-alice-v2     |  |
+|          |                                                        +------------------------+  |
+|          |                                                                                        |
+|          |--------------------> +------------------+                  +------------------------+  |
+|          |                      | candidate-bob    | ---------------> | candidate-bob          |  |
+|          |                      +------------------+                  +------------------------+  |
+|          |                                                                                        |
+|          |                      +------------------+  mTLS Verified   +------------------------+  |
+|          +--------------------> | candidate-charlie| ---------------> | candidate-charlie      |  |
+|                                 +------------------+ (Policy Protected)+------------------------+  |
+|                                                                                                   |
+|  +-----------------+  Unauthorized                                                                |
+|  |    rogue-pod    | ----(403 Forbidden)--------------------------------------------------------> |
+|  +-----------------+                                                                              |
++---------------------------------------------------------------------------------------------------+
